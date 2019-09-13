@@ -29,6 +29,7 @@ def merge_dict(base_items, new_items):
     """
     for key, value in new_items.items():
         if isinstance(value, dict) and value:
+            #针对dict,执行递归合并
             base_merge = merge_dict(base_items.get(key, {}), value)
             base_items[key] = base_merge
         else:

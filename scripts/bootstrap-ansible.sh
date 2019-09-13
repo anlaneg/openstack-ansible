@@ -16,9 +16,13 @@
 # (c) 2014, Kevin Carter <kevin.carter@rackspace.com>
 
 ## Shell Opts ----------------------------------------------------------------
+#-u 用于遇到未定义的变量报错
+#-x 用于执行时输出执行的语句
+#-e 用于遇到错误时直接退出
 set -e -u -x
 
 ## Vars ----------------------------------------------------------------------
+#${varname:-value} 如果变量varname没有定义，则使用default值value
 export HTTP_PROXY=${HTTP_PROXY:-""}
 export HTTPS_PROXY=${HTTPS_PROXY:-""}
 # The Ansible version used for testing
@@ -37,6 +41,7 @@ export PIP_OPTS=${PIP_OPTS:-""}
 export OSA_WRAPPER_BIN="${OSA_WRAPPER_BIN:-scripts/openstack-ansible.sh}"
 
 # This script should be executed from the root directory of the cloned repo
+# 跳到pro根目录
 cd "$(dirname "${0}")/.."
 
 ## Functions -----------------------------------------------------------------
@@ -74,6 +79,7 @@ case ${DISTRO_ID} in
           libselinux-python python-virtualenv
         ;;
     ubuntu|debian)
+	#debian系统更新
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get -y install \
           git-core curl gcc netcat \
@@ -99,6 +105,7 @@ esac
 hash -r virtualenv
 
 # Load nodepool PIP mirror settings
+# 构造pip选项
 load_nodepool_pip_opts
 
 # Ensure we use the HTTPS/HTTP proxy with pip if it is specified
@@ -121,6 +128,7 @@ UPPER_CONSTRAINTS_PROTO=$([ "$PYTHON_VERSION" == $(echo -e "$PYTHON_VERSION\n2.7
 export UPPER_CONSTRAINTS_FILE=${UPPER_CONSTRAINTS_FILE:-"$UPPER_CONSTRAINTS_PROTO://opendev.org/openstack/requirements/raw/$(awk '/requirements_git_install_branch:/ {print $2}' playbooks/defaults/repo_packages/openstack_services.yml)/upper-constraints.txt"}
 
 if [[ -z "${SKIP_OSA_RUNTIME_VENV_BUILD+defined}" ]]; then
+    #构造ansible运行环境
     build_ansible_runtime_venv
 fi
 

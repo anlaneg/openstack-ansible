@@ -32,12 +32,15 @@ def make_example_config(aio_config_file, configs_dir):
     """
     config = {}
 
+    #取配置目录下所有*.aio文件
     files = glob.glob(os.path.join(configs_dir, '*.aio'))
     for file_name in files:
         with open(file_name, 'r') as f:
+            #加载f文件，利用yaml生成结构，并更新到config
             config.update(yaml.safe_load(f.read()))
 
     with open(aio_config_file, 'r') as f:
+        #加载aio配置文件
         config.update(yaml.safe_load(f.read()))
 
     return config

@@ -46,7 +46,7 @@ class MissingDataSource(Exception):
     def __repr__(self):
         return self.message
 
-
+#返回一组待查询的path
 def _get_search_paths(preferred_path=None, suffix=None):
     """Return a list of search paths, including the standard location
 
@@ -61,14 +61,17 @@ def _get_search_paths(preferred_path=None, suffix=None):
         ),
     ]
     if preferred_path is not None:
+        #展开'~'路径
         search_paths.insert(0, os.path.expanduser(preferred_path))
 
     if suffix:
+        #为search_paths添加后缀
         search_paths = [os.path.join(p, suffix) for p in search_paths]
 
     return search_paths
 
 
+#在preferred_path及默认查询路径中查找filename,如果找到返回此路径，否则扔出异常或者返回false
 def file_find(filename, preferred_path=None, raise_if_missing=True):
     """Return the path to an existing file, or False if no file is found.
 
@@ -87,17 +90,20 @@ def file_find(filename, preferred_path=None, raise_if_missing=True):
 
     search_paths = _get_search_paths(preferred_path, suffix=filename)
 
+    #如果file_candidate为普通文件，则返回
     for file_candidate in search_paths:
         if os.path.isfile(file_candidate):
             return file_candidate
 
     # The file was not found
+    #未找到合适的文件的，触发异常
     if raise_if_missing:
         raise MissingDataSource(search_paths)
     else:
         return False
 
 
+#在preferred_path及默认查询路径中查找suffix目录,如果找到返回此路径，否则扔出异常或者返回false
 def dir_find(preferred_path=None, suffix=None, raise_if_missing=True):
     """Return the path to the user configuration files.
 
@@ -125,7 +131,7 @@ def dir_find(preferred_path=None, suffix=None, raise_if_missing=True):
     else:
         return False
 
-
+#加载base_dir下所有yml,yaml后缀文件，将其数据merge到user_defined_config中
 def _extra_config(user_defined_config, base_dir):
     """Discover new items in any extra directories and add the new values.
 
@@ -134,10 +140,12 @@ def _extra_config(user_defined_config, base_dir):
     """
     for root_dir, _, files in os.walk(base_dir):
         for name in files:
+            #只处理.yml,.yaml后缀的文件，将其数据合并到user_defined_config中
             if name.endswith(('.yml', '.yaml')):
                 with open(os.path.join(root_dir, name), 'rb') as f:
                     du.merge_dict(
                         user_defined_config,
+                        #转换f文件的数据
                         yaml.safe_load(f.read()) or {}
                     )
                     logger.debug("Merged overrides from file {}".format(name))
@@ -212,7 +220,7 @@ def write_hostnames(save_path, hostnames_ips):
             )).encode('ascii')
         )
 
-
+#自json文件中加载数据，返回对应的数据及数据来源文件名
 def _load_from_json(filename, preferred_path=None, raise_if_missing=True):
     """Return a dictionary found in json format in a given file
 
@@ -246,11 +254,13 @@ def load_inventory(preferred_path=None, default_inv=None, filename=None):
         or should have been loaded from.
     """
 
+    #确定要加载的文件名
     if filename:
         inv_fn = filename
     else:
         inv_fn = INVENTORY_FILENAME
 
+    #优先加载preferred_path的文件
     inventory, file_loaded = _load_from_json(inv_fn, preferred_path,
                                             raise_if_missing=False)
     if file_loaded is not False:
@@ -261,6 +271,7 @@ def load_inventory(preferred_path=None, default_inv=None, filename=None):
     if inventory is not False:
         logger.debug("Loaded existing inventory from {}".format(file_loaded))
     else:
+        #没有加载到数据，使用default_inv
         logger.debug("No existing inventory, created fresh skeleton.")
         inventory = copy.deepcopy(default_inv)
 

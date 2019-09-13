@@ -55,6 +55,7 @@ fi
 
 ## Functions -----------------------------------------------------------------
 # Build ansible-runtime venv
+# 安装ansible-rruntime虚环境
 function build_ansible_runtime_venv {
     # All distros have a python-virtualenv > 13.
     # - Centos 7 has 15.1, which holds pip 9.0.1, setuptools 28.8, wheel 0.29
@@ -101,12 +102,14 @@ function load_nodepool_pip_opts {
 
 # Determine the distribution we are running on, so that we can configure it
 # appropriately.
+# 系统监测
 function determine_distro {
     source /etc/os-release 2>/dev/null
     export DISTRO_ID="${ID}"
     export DISTRO_NAME="${NAME}"
 }
 
+#确保ssh key存在，如不存在创建，添加对生成公钥进authorized_keys
 function ssh_key_create {
   # Ensure that the ssh key exists and is an authorized_key
   key_path="${HOME}/.ssh"

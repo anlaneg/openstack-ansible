@@ -50,13 +50,17 @@ def args(arg_list):
         default=os.path.join(os.getcwd(), 'openstack_user_config.yml')
     )
 
+    #解析参数列表
     return vars(parser.parse_args(arg_list))
 
 if __name__ == "__main__":
     script_args = args(sys.argv[1:])
 
+    #先加载conf_dir目录下所有aio文件，再加载base指定的aio文件
+    #并生成config
     config = tools.make_example_config(
         script_args['base'],
         script_args['conf_dir']
     )
+    #将配置写成yaml文件
     tools.write_example_config(script_args['output'], config)
